@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
-# backend.py — patched (small fixes)
-# - ClientSession created on startup (fixes "no running event loop")
-# - More robust TwelveData parsing
-# - Minimal changes otherwise (keeps your endpoints & behaviour)
+"""
+backend_bybit.py
+Simple async backend that fetches klines from Bybit REST API,
+computes indicators and returns predictions via HTTP.
+
+Install requirements.txt, then:
+$ python3 backend_bybit.py
+"""
 
 import asyncio
 import math
@@ -11,73 +15,38 @@ import json
 from collections import deque
 from aiohttp import web, ClientSession, ClientTimeout
 
-# ==========================
-# CONFIG — edit these values
-# ==========================
-TELEGRAM_TOKEN = "8237319754:AAFAi-E0IAHuClg7l_PNfWwkMUH4QEiF7W0"
-CHAT_ID = "7779937295"
-TWELVEDATA_API_KEY = "083054b70e074f92b64ebdc75e084f4c"  # optional
-EXTERNAL_SIGNAL_URL = ""   # set via /set_external or hardcode
-EXTERNAL_SIGNAL_HEADERS = {}
-PAIRS = ["EUR/USD", "GBP/USD"]   # use slash form for TwelveData
+# ----------------------
+# Config
+# ----------------------
+PAIRS = ["EURUSD", "AUDUSD", "GBPUSD", "BTCUSDT"]  # your list
+KLINE_INTERVAL = "1"   # 1 minute: adjust as needed (Bybit interval param)
+KLINE_LIMIT = 200      # how many bars to request for history
+TWELVE_OPTIONAL = None  # not used, left for compatibility
+BYBIT_BASE = "https://api.bybit.com"  # public REST base
 POLL_SECONDS = 5
 MIN_HISTORY = 30
-MAX_HISTORY = 600
-CONF_THRESHOLD = 0.4
-COOLDOWN = 30
-LOG_FILE = "backend_signals.log"
-# ==========================
+
+# tweak thresholds
+MIN_CONFIDENCE = 0.60
+SIGNAL_DIFF_THRESHOLD = 0.25
+
+# aiohttp session timeout
+_timeout = ClientTimeout(total=12)
 
 # runtime state
-history = {p: deque(maxlen=MAX_HISTORY) for p in PAIRS}
-last_signal = {p: None for p in PAIRS}
-last_signal_time = {p: 0 for p in PAIRS}
-bot_running = False
-bot_task = None
-external_signal_url = EXTERNAL_SIGNAL_URL
-external_signal_headers = EXTERNAL_SIGNAL_HEADERS
+history = {p: deque(maxlen=KLINE_LIMIT) for p in PAIRS}
+aio_session: ClientSession | None = None
 
-# aio session will be created on startup
-aio_session = None
-_timeout = ClientTimeout(total=10)
-
-def log(msg):
-    ts = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
-    line = f"{ts} | {msg}"
-    print(line)
-    try:
-        with open(LOG_FILE, "a") as f:
-            f.write(line + "\n")
-    except Exception:
-        pass
-
-async def tg_send(text):
-    if not TELEGRAM_TOKEN or not CHAT_ID:
-        log("Telegram not configured.")
-        return False
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    payload = {"chat_id": CHAT_ID, "text": text}
-    try:
-        async with aio_session.post(url, json=payload) as r:
-            j = await r.json()
-            if not j.get("ok"):
-                log("Telegram send failed: " + str(j))
-                return False
-            return True
-    except Exception as e:
-        log("Telegram HTTP error: " + str(e))
-        return False
-
-# indicators
+# ----------------------
+# utils - indicators
+# ----------------------
 def sma(arr, period):
-    if len(arr) < period:
-        return None
+    if len(arr) < period: return None
     a = list(arr)
     return sum(a[-period:]) / period
 
 def ema(arr, period):
-    if len(arr) < period:
-        return None
+    if len(arr) < period: return None
     k = 2.0 / (period + 1.0)
     vals = list(arr)[-period:]
     v = vals[0]
@@ -86,364 +55,230 @@ def ema(arr, period):
     return v
 
 def rsi(arr, period=14):
-    if len(arr) < period + 1:
-        return None
+    if len(arr) < period + 1: return None
     gains = losses = 0.0
     a = list(arr)
     for i in range(-period, 0):
         diff = a[i] - a[i-1]
-        if diff > 0:
-            gains += diff
-        else:
-            losses += -diff
+        if diff > 0: gains += diff
+        else: losses += -diff
     avg_g = gains / period if gains else 1e-8
     avg_l = losses / period if losses else 1e-8
     rs = avg_g / avg_l
     return 100.0 - (100.0 / (1 + rs))
 
 def bollinger(arr, period=20, mult=2):
-    if len(arr) < period:
-        return None, None, None
+    if len(arr) < period: return None, None, None
     a = list(arr)[-period:]
     mid = sum(a) / period
     var = sum((x - mid) ** 2 for x in a) / period
     sd = math.sqrt(var)
     return mid - mult * sd, mid, mid + mult * sd
 
-# --------------------------
-# TwelveData helper (robust)
-# --------------------------
-async def fetch_prices(pairs):
+def macd(arr, fast=12, slow=26, signal=9):
+    if len(arr) < slow + signal: return None, None, None
+    ema_fast = ema(arr, fast)
+    ema_slow = ema(arr, slow)
+    if ema_fast is None or ema_slow is None: return None, None, None
+    macd_line = ema_fast - ema_slow
+    # approximate MACD signal by computing ema on the last values of macd_line series
+    # to compute signal properly we'd need macd series; here use a short approach:
+    # fallback: compute macd series for last (slow+signal) bars
+    vals = list(arr)
+    macd_series = []
+    for i in range(slow, len(vals)):
+        e_fast = sum(vals[i-fast+1:i+1]) / fast if i-fast+1 >= 0 else None
+        e_slow = sum(vals[i-slow+1:i+1]) / slow if i-slow+1 >= 0 else None
+        if e_fast is None or e_slow is None: continue
+        macd_series.append(e_fast - e_slow)
+    if len(macd_series) < signal:
+        return macd_line, None, None
+    # signal line:
+    sig = None
+    k = 2.0/(signal+1.0)
+    v = macd_series[0]
+    for x in macd_series[1:]:
+        v = x*k + v*(1-k)
+    sig = v
+    hist = macd_line - sig if sig is not None else None
+    return macd_line, sig, hist
+
+# ----------------------
+# Bybit REST fetching (klines)
+# ----------------------
+async def fetch_klines_bybit(pair, interval=KLINE_INTERVAL, limit=KLINE_LIMIT):
     """
-    pairs: list of "EUR/USD" strings
-    returns: {pair: float or None}
+    Returns list of close prices newest last.
+    Uses classic Bybit public kline endpoint (v2).
+    NOTE: Some markets use different endpoints; this version attempts common v2 endpoint.
     """
-    if not TWELVEDATA_API_KEY:
-        return {p: None for p in pairs}
-    # send slash form like EUR/USD,GBP/USD
-    symbols = ",".join(pairs)
-    url = f"https://api.twelvedata.com/price?symbol={symbols}&apikey={TWELVEDATA_API_KEY}"
+    # normalize pair: BYBIT expects e.g. BTCUSDT, EURUSD etc.
+    sym = pair.upper()
+    # different endpoints for spot vs contract sometimes — v2 public kline supports many.
+    url = f"{BYBIT_BASE}/v2/public/kline/list?symbol={sym}&interval={interval}&limit={limit}"
     try:
         async with aio_session.get(url, timeout=_timeout) as resp:
             text = await resp.text()
+            data = json.loads(text)
     except Exception as e:
-        log("TwelveData network error: " + str(e))
-        return {p: None for p in pairs}
-
-    # try parse JSON
-    try:
-        data = json.loads(text)
-    except Exception:
-        log("TwelveData json parse error (raw): " + (text[:200] if text else "<empty>"))
-        return {p: None for p in pairs}
-
-    results = {p: None for p in pairs}
-
-    # error object
-    if isinstance(data, dict) and data.get("status") == "error":
-        log("TwelveData returned error: " + json.dumps(data))
-        return results
-
-    # single-symbol response: {"symbol":"EUR/USD","price":"1.08"}
-    if isinstance(data, dict) and "price" in data and "symbol" in data:
-        sym = data.get("symbol")
-        # normalize key to slash form
-        key = sym if "/" in sym else (sym[:3] + "/" + sym[3:])
-        if key in results:
+        # network or parse issue
+        return []
+    # parse expected structure: { "ret_code":0, "result":[{...}, ...] }
+    closes = []
+    if isinstance(data, dict):
+        # some Bybit endpoints return {'result': [...]}
+        res = data.get("result") or data.get("data") or data.get("result")
+        if isinstance(res, list):
+            # ensure sorted by open_time ascending
             try:
-                results[key] = float(data["price"])
+                res_sorted = sorted(res, key=lambda x: int(x.get("open_time", x.get("start_at", 0))))
             except Exception:
-                results[key] = None
-        return results
-
-    # multi-symbol response might be:
-    # {"EUR/USD":{"price":"1.08"}, "GBP/USD":{"price":"1.23"}}
-    if isinstance(data, dict):
-        for k, v in data.items():
-            if k in results and isinstance(v, dict) and "price" in v:
+                res_sorted = res
+            for bar in res_sorted:
+                # common keys: close, close_price
+                c = bar.get("close") or bar.get("close_price") or bar.get("Close")
                 try:
-                    results[k] = float(v["price"])
+                    closes.append(float(c))
                 except Exception:
-                    results[k] = None
-            else:
-                # try converting key like "EURUSD" -> "EUR/USD"
-                if len(k) >= 6 and "/" not in k:
-                    kk = k[:3] + "/" + k[3:]
-                    if kk in results and isinstance(v, dict) and "price" in v:
-                        try:
-                            results[kk] = float(v["price"])
-                        except Exception:
-                            results[kk] = None
-    return results
+                    continue
+    return closes
 
-# --------------------------
-# External signals fetcher
-# --------------------------
-async def fetch_external_signal():
-    if not external_signal_url:
-        return []
-    try:
-        async with aio_session.get(external_signal_url, headers=external_signal_headers, timeout=_timeout) as r:
-            if r.status != 200:
-                log(f"External signal HTTP {r.status}")
-                return []
-            data = await r.json()
-    except Exception as e:
-        log("External signal fetch error: " + str(e))
-        return []
-
-    signals = []
-    if isinstance(data, dict):
-        if "pair" in data and "action" in data:
-            signals.append(data)
-        elif "signals" in data and isinstance(data["signals"], list):
-            signals = data["signals"]
-    elif isinstance(data, list):
-        signals = data
-    return signals
-
-# --------------------------
-# Ensemble decision
-# --------------------------
-def ensemble_decision(pair, ext_signal, prices_hist):
-    if ext_signal:
-        action = ext_signal.get("action", "").upper()
-        conf = float(ext_signal.get("confidence", 0.7))
-        r = rsi(prices_hist, 14) if len(prices_hist) >= 20 else None
-        if r is not None:
-            if action == "BUY" and r > 80:
-                conf *= 0.5
-            if action == "SELL" and r < 20:
-                conf *= 0.5
-        return (action if conf >= CONF_THRESHOLD else None, conf)
-
-    if len(prices_hist) < MIN_HISTORY:
-        return (None, 0.0)
+# ----------------------
+# Ensemble decision from indicators
+# ----------------------
+def ensemble_decision_from_history(pair, closes):
+    """
+    Given closes list (newest last), produce ('BUY'|'SELL'|None, confidence)
+    """
+    if len(closes) < MIN_HISTORY:
+        return None, 0.0
+    last = closes[-1]
+    e9 = ema(closes, 9)
+    e21 = ema(closes, 21)
+    s3 = sma(closes, 3)
+    s8 = sma(closes, 8)
+    r = rsi(closes, 14)
+    low, mid, up = bollinger(closes, 20, 2)
+    macd_line, macd_sig, macd_hist = macd(closes)
 
     vote_buy = vote_sell = 0.0
-    last = prices_hist[-1]
-    e9 = ema(prices_hist, 9)
-    e21 = ema(prices_hist, 21)
-    s3 = sma(prices_hist, 3)
-    s8 = sma(prices_hist, 8)
-    r = rsi(prices_hist, 14)
-    low, mid, up = bollinger(prices_hist, 20, 2)
 
     if e9 and e21:
-        if e9 > e21:
-            vote_buy += 1.2
-        else:
-            vote_sell += 1.2
+        if e9 > e21: vote_buy += 1.2
+        else: vote_sell += 1.2
+
     if s3 and s8:
-        if s3 > s8:
-            vote_buy += 0.6
-        else:
-            vote_sell += 0.6
+        if s3 > s8: vote_buy += 0.6
+        else: vote_sell += 0.6
+
     if r is not None:
-        if r < 30:
-            vote_buy += 0.9
-        if r > 70:
-            vote_sell += 0.9
-    if low is not None:
-        if last < low:
-            vote_buy += 0.7
-        if last > up:
-            vote_sell += 0.7
+        if r < 30: vote_buy += 0.9
+        if r > 70: vote_sell += 0.9
+
+    if low is not None and up is not None:
+        if last < low: vote_buy += 0.7
+        if last > up: vote_sell += 0.7
+
+    if macd_hist is not None:
+        if macd_hist > 0: vote_buy += 0.8
+        else: vote_sell += 0.8
 
     total = vote_buy + vote_sell + 1e-9
     bnorm = vote_buy / total
     snorm = vote_sell / total
-    if bnorm - snorm > 0.25:
-        return ("BUY", bnorm)
-    if snorm - bnorm > 0.25:
-        return ("SELL", snorm)
-    return (None, max(bnorm, snorm))
-# ======================================
-# ANTI-SPAM + SMART SIGNAL FILTER
-# ======================================
 
-LAST_SIGNAL = {}  # { "EUR/USD": "BUY", "GBP/USD": "SELL" }
-COOLDOWN = {}     # cooldown timers
+    confidence = max(bnorm, snorm)
+    if bnorm - snorm > SIGNAL_DIFF_THRESHOLD and confidence >= MIN_CONFIDENCE:
+        return "BUY", round(confidence, 3)
+    if snorm - bnorm > SIGNAL_DIFF_THRESHOLD and confidence >= MIN_CONFIDENCE:
+        return "SELL", round(confidence, 3)
+    return None, round(confidence, 3)
 
-MIN_CONFIDENCE = 0.65       # adjust this higher to reduce noise
-SIGNAL_COOLDOWN = 60        # seconds between signals
-
-
-def should_send_signal(symbol, direction, confidence):
-    now = time.time()
-
-    # 1) Confidence check
-    if confidence < MIN_CONFIDENCE:
-        return False
-
-    # 2) If no previous signal → allow
-    if symbol not in LAST_SIGNAL:
-        LAST_SIGNAL[symbol] = direction
-        COOLDOWN[symbol] = now
-        return True
-
-    # 3) Cooldown check
-    if now - COOLDOWN[symbol] < SIGNAL_COOLDOWN:
-        return False  # signal too soon
-
-    # 4) Only send if direction changed
-    if LAST_SIGNAL[symbol] != direction:
-        LAST_SIGNAL[symbol] = direction
-        COOLDOWN[symbol] = now
-        return True
-
-    return False
-# --------------------------
-# Bot loop
-# --------------------------
-async def bot_loop():
-    global bot_running, last_signal, last_signal_time
-    log("Bot loop started.")
-    while bot_running:
+# ----------------------
+# Background poller: keeps history updated
+# ----------------------
+async def poller():
+    while True:
         try:
-            ext_list = await fetch_external_signal()
-            prices = await fetch_prices(PAIRS)
-            # append prices
             for p in PAIRS:
-                pr = prices.get(p)
-                if pr is not None:
-                    history[p].append(float(pr))
-
-            handled_pairs = set()
-            for s in ext_list:
-                pair = s.get("pair")
-                if not pair:
-                    continue
-                if "/" not in pair and len(pair) >= 6:
-                    pair = pair[:3] + "/" + pair[3:]
-                if pair not in PAIRS:
-                    continue
-                handled_pairs.add(pair)
-                action = s.get("action", "").upper()
-                conf = float(s.get("confidence", 0.7))
-                dec, conf2 = ensemble_decision(pair, {"action": action, "confidence": conf}, history[pair])
-                final_action = dec
-                final_conf = conf2
-                now = time.time()
-                if final_action and (final_action != last_signal[pair] or now - last_signal_time[pair] > COOLDOWN):
-                    last_signal[pair] = final_action
-                    last_signal_time[pair] = now
-                    price = history[pair][-1] if history[pair] else None
-                    msg = f"{pair} | {final_action}\nPrice: {price}\nConf: {final_conf:.2f}\nSource: external"
-                    await tg_send(msg)
-                    log("SIGNAL SENT: " + msg.replace("\n", " | "))
-
-            for p in PAIRS:
-                if p in handled_pairs:
-                    continue
-                dec, conf = ensemble_decision(p, None, history[p])
-                now = time.time()
-                if dec and (dec != last_signal[p] or now - last_signal_time[p] > COOLDOWN):
-                    last_signal[p] = dec
-                    last_signal_time[p] = now
-                    price = history[p][-1] if history[p] else None
-                    msg = f"{p} | {dec}\nPrice: {price}\nConf: {conf:.2f}\nSource: indicators"
-                    await tg_send(msg)
-                    log("SIGNAL SENT: " + msg.replace("\n", " | "))
-
+                closes = await fetch_klines_bybit(p)
+                if closes:
+                    history[p].clear()
+                    for v in closes:
+                        history[p].append(v)
+            # short sleep between cycles
         except Exception as e:
-            log("Bot loop error: " + str(e))
+            print("Poller error:", e)
         await asyncio.sleep(POLL_SECONDS)
-    log("Bot loop stopped.")
 
-# --------------------------
-# HTTP endpoints
-# --------------------------
+# ----------------------
+# HTTP api
+# ----------------------
 routes = web.RouteTableDef()
 
 @routes.get("/")
-async def home(request):
-    return web.json_response({"status": "API is running", "bot_running": bot_running})
+async def root(req):
+    return web.json_response({"status":"ok", "pairs": PAIRS})
 
-@routes.post("/start")
-async def start(request):
-    global bot_running, bot_task
-    if not bot_running:
-        bot_running = True
-        bot_task = asyncio.create_task(bot_loop())
-        log("Bot started via /start")
-    return web.json_response({"message": "started"})
+@routes.get("/metrics")
+async def get_metrics(req):
+    # show which pairs have data & sample last price
+    pairs_info = {}
+    for p in PAIRS:
+        pairs_info[p] = {
+            "bars": len(history[p]),
+            "last": history[p][-1] if history[p] else None
+        }
+    return web.json_response({"status":"online", "pairs": pairs_info})
 
-@routes.post("/stop")
-async def stop(request):
-    global bot_running, bot_task
-    bot_running = False
-    if bot_task:
-        bot_task.cancel()
-        bot_task = None
-    log("Bot stopped via /stop")
-    return web.json_response({"message": "stopped"})
+@routes.get("/predict/{pair}")
+async def get_predict(req):
+    pair = req.match_info.get("pair", "").upper().replace("/", "")
+    # normalize: user might send EURUSD or EUR/USD
+    pair = pair.replace("/", "")
+    # find matching configured pair ignoring slash
+    matched = None
+    for p in PAIRS:
+        if p.replace("/", "").upper() == pair:
+            matched = p
+            break
+    if not matched:
+        return web.json_response({"error":"pair not supported", "supported":PAIRS}, status=400)
+    closes = list(history[matched])
+    dec, conf = ensemble_decision_from_history(matched, closes)
+    response = {
+        "pair": matched,
+        "prediction": dec,
+        "confidence": conf,
+        "last_price": closes[-1] if closes else None,
+        "bars": len(closes)
+    }
+    # include some indicator snippets
+    if closes:
+        response["indicators"] = {
+            "rsi": rsi(closes, 14),
+            "ema9": ema(closes, 9),
+            "ema21": ema(closes, 21),
+            "boll_mid": bollinger(closes, 20, 2)[1]
+        }
+    return web.json_response(response)
 
-@routes.get("/status")
-async def status(request):
-    return web.json_response({
-        "bot_running": bot_running,
-        "last_signal": last_signal,
-        "last_signal_time": last_signal_time,
-        "external_signal_url": external_signal_url
-    })
-
-@routes.post("/signal")
-async def manual_signal(request):
-    try:
-        data = await request.json()
-    except Exception:
-        return web.json_response({"error": "invalid json"}, status=400)
-    pair = data.get("pair")
-    action = data.get("action", "").upper()
-    conf = float(data.get("confidence", 0.8))
-    if "/" not in pair and len(pair) >= 6:
-        pair = pair[:3] + "/" + pair[3:]
-    if pair not in PAIRS:
-        return web.json_response({"error": "pair not supported"}, status=400)
-    price = history[pair][-1] if history[pair] else None
-    msg = f"{pair} | {action}\nPrice: {price}\nConf: {conf:.2f}\nSource: manual"
-    await tg_send(msg)
-    last_signal[pair] = action
-    last_signal_time[pair] = time.time()
-    log("Manual signal: " + msg.replace("\n", " | "))
-    return web.json_response({"message": "sent", "signal": data})
-
-@routes.post("/set_external")
-async def set_external(request):
-    global external_signal_url, external_signal_headers
-    try:
-        data = await request.json()
-    except Exception:
-        return web.json_response({"error": "invalid json"}, status=400)
-    url = data.get("url")
-    headers = data.get("headers", {})
-    if not url:
-        return web.json_response({"error": "missing url"}, status=400)
-    external_signal_url = url
-    external_signal_headers = headers
-    log("External signal URL updated: " + url)
-    return web.json_response({"message": "updated", "url": url})
-
-# --------------------------
-# Startup / cleanup
-# --------------------------
+# ----------------------
+# Startup and main
+# ----------------------
 app = web.Application()
 app.add_routes(routes)
 
 async def on_startup(app):
-    global aio_session, bot_running, bot_task
+    global aio_session
     aio_session = ClientSession(timeout=_timeout)
-    # auto-start the bot
-    bot_running = True
-    bot_task = asyncio.create_task(bot_loop())
-    log("Backend started; bot auto-started.")
+    app['poller'] = asyncio.create_task(poller())
+    print("Backend started, poller running.")
 
 async def on_cleanup(app):
-    global aio_session, bot_running, bot_task
-    bot_running = False
-    if bot_task:
-        bot_task.cancel()
+    global aio_session
+    if 'poller' in app and not app['poller'].done():
+        app['poller'].cancel()
     if aio_session:
         await aio_session.close()
 
