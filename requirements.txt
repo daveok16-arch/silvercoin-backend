@@ -1,0 +1,4 @@
+aiohttp
+requests
+python-dotenv
+flask
