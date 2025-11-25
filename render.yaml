@@ -7,7 +7,7 @@ services:
     startCommand: python3 backend.py
     envVars:
       - key: PORT
-        value: "10000"  # Render will override this automatically
+        value: "10000"
       - key: TWELVEDATA_API_KEY
         value: "c13f966de04f4939b4325bb55cf7ffc0"
       - key: TELEGRAM_TOKEN
