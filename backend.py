@@ -1,42 +1,46 @@
 #!/usr/bin/env python3
-# backend.py - minimal API server (EUR/USD + AUD/USD), safe for Render & Termux
-
-import os
+# backend.py - minimal API server (EUR/USD + AUD/USD) with Nigeria timezone
 import asyncio
 import aiohttp
 from aiohttp import web
+import os
+import json
 import logging
+from logging.handlers import RotatingFileHandler
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 # =========================
+# Config
+# =========================
+NIGERIA_TZ = ZoneInfo("Africa/Lagos")
+LOGFILE = os.path.expanduser("~/silvercoin-backend/backend.log")
+
 # Logging setup
-# =========================
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-LOGFILE = os.path.join(BASE_DIR, "backend.log")
-os.makedirs(BASE_DIR, exist_ok=True)
+class NigeriaFormatter(logging.Formatter):
+    def formatTime(self, record, datefmt=None):
+        dt = datetime.fromtimestamp(record.created, tz=NIGERIA_TZ)
+        return dt.strftime("%Y-%m-%d %H:%M:%S")
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler(LOGFILE),
-        logging.StreamHandler()
-    ]
-)
 logger = logging.getLogger("silvercoin")
+logger.setLevel(logging.INFO)
+handler = RotatingFileHandler(LOGFILE, maxBytes=500_000, backupCount=2)
+handler.setFormatter(NigeriaFormatter("[%(asctime)s] %(levelname)s: %(message)s"))
+logger.addHandler(handler)
+logger.addHandler(logging.StreamHandler())
 
-# =========================
-# Config / Environment
-# =========================
+# Environment variables
 TWELVEDATA_API_KEY = os.getenv("TWELVEDATA_API_KEY", "")
 PAIRS = ["EUR/USD", "AUD/USD"]
 TWELVEDATA_URL = "https://api.twelvedata.com/time_series"
 
-_cache = {}  # in-memory cache for price data
+# In-memory cache
+_cache = {}
 
 # =========================
 # Fetch data from TwelveData
 # =========================
-async def fetch_from_twelvedata(pair: str):
+async def fetch_from_twelvedata(pair):
     if not TWELVEDATA_API_KEY:
         return {"error": "TWELVEDATA_API_KEY not set"}
     params = {
@@ -52,15 +56,15 @@ async def fetch_from_twelvedata(pair: str):
                 try:
                     data = await resp.json()
                 except Exception:
-                    logger.warning("Non-JSON response for %s: %s", pair, text[:200])
+                    logger.warning("Non-JSON from TwelveData for %s: %s", pair, text[:200])
                     return {"error": "invalid response", "raw": text[:200]}
                 return data
     except Exception as e:
-        logger.exception("Error fetching %s: %s", pair, e)
+        logger.exception("Fetch error for %s: %s", pair, e)
         return {"error": str(e)}
 
 # =========================
-# API Routes
+# Routes
 # =========================
 routes = web.RouteTableDef()
 
@@ -74,39 +78,35 @@ async def health(request):
 
 @routes.get("/price")
 async def price(request):
-    pair = request.rel_url.query.get("pair")
-    if not pair:
+    qp = request.rel_url.query.get("pair")
+    if not qp:
         return web.json_response({"pairs": PAIRS})
-    if pair not in PAIRS:
+    if qp not in PAIRS:
         return web.json_response({"error": "pair not supported", "supported": PAIRS}, status=400)
 
-    # Use cache if recent
-    cached = _cache.get(pair)
+    cached = _cache.get(qp)
     if cached and (asyncio.get_event_loop().time() - cached.get("_ts", 0) < 50):
         return web.json_response({"from_cache": True, "data": cached["data"]})
 
-    data = await fetch_from_twelvedata(pair)
-    if isinstance(data, dict) and data.get("status") == "error":
-        return web.json_response({"error": data}, status=502)
-
-    _cache[pair] = {"data": data, "_ts": asyncio.get_event_loop().time()}
+    data = await fetch_from_twelvedata(qp)
+    _cache[qp] = {"data": data, "_ts": asyncio.get_event_loop().time()}
     return web.json_response({"from_cache": False, "data": data})
 
 @routes.get("/signal")
 async def signal(request):
-    pair = request.rel_url.query.get("pair")
-    if not pair or pair not in PAIRS:
+    qp = request.rel_url.query.get("pair")
+    if not qp or qp not in PAIRS:
         return web.json_response({"error": "pair required and must be one of " + ", ".join(PAIRS)}, status=400)
 
-    data = _cache.get(pair, {}).get("data")
+    data = _cache.get(qp, {}).get("data")
     if not data:
-        data = await fetch_from_twelvedata(pair)
+        data = await fetch_from_twelvedata(qp)
 
     values = data.get("values") if isinstance(data, dict) else None
     if not values or not isinstance(values, list):
         return web.json_response({"error": "no price data", "details": data}, status=502)
 
-    latest = values[0]  # newest first
+    latest = values[0]  # newest candle
     try:
         open_p = float(latest["open"])
         close_p = float(latest["close"])
@@ -120,14 +120,23 @@ async def signal(request):
     else:
         sig = "NEUTRAL"
 
+    # Convert API datetime to Nigeria time
+    utc_time_str = latest.get("datetime")
+    utc_dt = datetime.strptime(utc_time_str, "%Y-%m-%d %H:%M:%S")
+    local_dt = utc_dt.replace(tzinfo=ZoneInfo("UTC")).astimezone(NIGERIA_TZ)
+    signal_time = local_dt.strftime("%Y-%m-%d %H:%M:%S")
+
     return web.json_response({
-        "pair": pair,
+        "pair": qp,
         "signal": sig,
         "open": open_p,
         "close": close_p,
-        "datetime": latest.get("datetime")
+        "datetime": signal_time
     })
 
+# =========================
+# Backend log view
+# =========================
 @routes.get("/log")
 async def get_log(request):
     try:
@@ -142,29 +151,16 @@ async def get_log(request):
         return web.json_response({"error": str(e)}, status=500)
 
 # =========================
-# Background Poller (updates cache every 60s)
-# =========================
-async def poller():
-    while True:
-        for pair in PAIRS:
-            data = await fetch_from_twelvedata(pair)
-            if isinstance(data, dict):
-                _cache[pair] = {"data": data, "_ts": asyncio.get_event_loop().time()}
-                logger.info("Fetched %d bars for %s", len(data.get("values", [])), pair)
-        await asyncio.sleep(60)
-
-# =========================
-# App Factory for Gunicorn
+# App factory
 # =========================
 def create_app():
     app = web.Application()
     app.add_routes(routes)
-    app.on_startup.append(lambda app: asyncio.create_task(poller()))
     return app
 
 app = create_app()
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "8080"))
-    logger.info("Starting web app on 0.0.0.0:%d", port)
+    logger.info(f"Starting web app on 0.0.0.0:{port}")
     web.run_app(app, host="0.0.0.0", port=port)

@@ -1,0 +1,243 @@
+[2025-11-25 13:39:24] INFO: Starting SNIPER loop (Nigeria Time UTC+1)...
+[2025-11-25 13:39:25] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 13:39:25] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 13:39:45] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 13:39:45] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 13:40:05] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 13:40:05] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 13:40:25] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 13:40:25] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 13:40:42] INFO: Sniper stopped manually.
+[2025-11-25 13:40:49] INFO: Starting SNIPER loop (Nigeria Time UTC+1)...
+[2025-11-25 13:40:49] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 13:40:49] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 13:41:09] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 13:41:09] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 13:41:28] INFO: Sniper stopped manually.
+[2025-11-25 13:42:57] INFO: Starting SNIPER loop (Nigeria Time UTC+1)...
+[2025-11-25 13:42:57] WARNING: Telegram not configured.
+[2025-11-25 13:42:58] WARNING: Telegram not configured.
+[2025-11-25 13:42:58] INFO: Sent signal: EUR/USD – SELL
+[2025-11-25 13:42:59] WARNING: Telegram not configured.
+[2025-11-25 13:42:59] INFO: Sent signal: AUD/USD – BUY
+[2025-11-25 13:43:20] WARNING: Telegram not configured.
+[2025-11-25 13:43:20] INFO: Sent signal: EUR/USD – BUY
+[2025-11-25 13:43:20] WARNING: Telegram not configured.
+[2025-11-25 13:43:20] INFO: Sent signal: AUD/USD – NEUTRAL
+[2025-11-25 13:43:51] INFO: Sniper stopped manually.
+[2025-11-25 13:44:06] INFO: Starting SNIPER loop (Nigeria Time UTC+1)...
+[2025-11-25 13:44:08] INFO: Sent signal: EUR/USD – BUY
+[2025-11-25 13:44:09] INFO: Sent signal: AUD/USD – NEUTRAL
+[2025-11-25 13:44:52] INFO: Sent signal: EUR/USD – BUY
+[2025-11-25 13:44:53] INFO: Sent signal: AUD/USD – BUY
+[2025-11-25 13:45:36] INFO: Sent signal: EUR/USD – BUY
+[2025-11-25 13:45:38] INFO: Sent signal: AUD/USD – BUY
+[2025-11-25 13:46:26] INFO: Sent signal: EUR/USD – BUY
+[2025-11-25 13:46:27] INFO: Sent signal: AUD/USD – BUY
+[2025-11-25 13:47:32] INFO: Sent signal: EUR/USD – SELL
+[2025-11-25 13:47:34] INFO: Sent signal: AUD/USD – SELL
+[2025-11-25 13:48:05] ERROR: Error fetching EUR/USD: 
+[2025-11-25 13:48:46] INFO: Sent signal: EUR/USD – SELL
+[2025-11-25 13:48:54] INFO: Sent signal: AUD/USD – SELL
+[2025-11-25 13:49:46] INFO: Sent signal: EUR/USD – SELL
+[2025-11-25 13:49:58] INFO: Sent signal: AUD/USD – SELL
+[2025-11-25 13:50:54] INFO: Sent signal: EUR/USD – SELL
+[2025-11-25 13:51:02] INFO: Sent signal: AUD/USD – SELL
+[2025-11-25 13:51:29] INFO: Sent signal: EUR/USD – BUY
+[2025-11-25 13:51:30] INFO: Sent signal: AUD/USD – SELL
+[2025-11-25 13:52:01] ERROR: Error fetching EUR/USD: 
+[2025-11-25 13:52:27] INFO: Sent signal: EUR/USD – BUY
+[2025-11-25 13:52:33] INFO: Sent signal: AUD/USD – BUY
+[2025-11-25 13:53:54] INFO: Sent signal: EUR/USD – BUY
+[2025-11-25 13:54:00] INFO: Sent signal: AUD/USD – BUY
+[2025-11-25 13:54:43] INFO: Sent signal: EUR/USD – BUY
+[2025-11-25 13:54:44] INFO: Sent signal: AUD/USD – BUY
+[2025-11-25 13:55:27] INFO: Sent signal: EUR/USD – BUY
+[2025-11-25 13:55:28] INFO: Sent signal: AUD/USD – BUY
+[2025-11-25 13:56:57] INFO: Sent signal: EUR/USD – SELL
+[2025-11-25 13:57:00] INFO: Sent signal: AUD/USD – BUY
+[2025-11-25 13:57:22] INFO: Sent signal: EUR/USD – SELL
+[2025-11-25 13:58:27] ERROR: Telegram error: ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+[2025-11-25 13:58:27] INFO: Sent signal: AUD/USD – BUY
+[2025-11-25 13:59:02] INFO: Sent signal: EUR/USD – BUY
+[2025-11-25 13:59:07] INFO: Sent signal: AUD/USD – BUY
+[2025-11-25 13:59:55] INFO: Sent signal: EUR/USD – BUY
+[2025-11-25 14:00:01] INFO: Sent signal: AUD/USD – BUY
+[2025-11-25 14:01:42] INFO: Sent signal: EUR/USD – SELL
+[2025-11-25 14:01:46] INFO: Sent signal: AUD/USD – SELL
+[2025-11-25 14:02:35] INFO: Sent signal: EUR/USD – BUY
+[2025-11-25 14:02:38] INFO: Sent signal: AUD/USD – BUY
+[2025-11-25 14:03:21] INFO: Sent signal: EUR/USD – BUY
+[2025-11-25 14:03:22] INFO: Sent signal: AUD/USD – BUY
+[2025-11-25 14:04:56] INFO: Sent signal: EUR/USD – SELL
+[2025-11-25 14:05:19] INFO: Sent signal: AUD/USD – BUY
+[2025-11-25 14:05:50] ERROR: Error fetching EUR/USD: 
+[2025-11-25 14:05:53] INFO: Sent signal: AUD/USD – BUY
+[2025-11-25 14:06:22] INFO: Sent signal: EUR/USD – BUY
+[2025-11-25 14:06:27] INFO: Sent signal: AUD/USD – BUY
+[2025-11-25 14:06:50] INFO: Sent signal: EUR/USD – BUY
+[2025-11-25 14:07:48] ERROR: Error fetching EUR/USD: 
+[2025-11-25 14:07:59] INFO: Sent signal: AUD/USD – SELL
+[2025-11-25 14:08:24] INFO: Sent signal: EUR/USD – SELL
+[2025-11-25 14:08:58] INFO: Sent signal: EUR/USD – BUY
+[2025-11-25 14:09:02] INFO: Sent signal: AUD/USD – SELL
+[2025-11-25 17:59:54] INFO: Starting SNIPER loop (Nigeria Time UTC+1)...
+[2025-11-25 17:59:54] WARNING: Telegram not configured.
+[2025-11-25 17:59:54] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 17:59:54] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:00:14] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:00:14] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:00:19] INFO: Sniper stopped manually.
+[2025-11-25 18:00:32] INFO: Starting SNIPER loop (Nigeria Time UTC+1)...
+[2025-11-25 18:01:11] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:01:11] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:01:31] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:01:31] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:01:51] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:01:51] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:02:12] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:02:12] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:02:32] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:02:32] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:02:52] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:02:52] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:03:12] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:03:12] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:03:32] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:03:32] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:03:52] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:03:52] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:04:12] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:04:12] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:04:32] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:04:32] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:04:52] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:04:52] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:05:12] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:05:12] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:05:32] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:05:32] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:05:52] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:05:52] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:06:12] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:06:12] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:06:32] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:06:32] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:06:52] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:06:52] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:07:12] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:07:12] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:07:32] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:07:32] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:07:52] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:07:52] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:08:12] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:08:12] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:08:32] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:08:32] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:08:52] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:08:52] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:09:12] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:09:12] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:09:32] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:09:32] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:09:52] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:09:52] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:10:12] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:10:12] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:10:32] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:10:33] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:10:53] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:10:53] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:11:13] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:11:13] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:11:33] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:11:33] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:11:53] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:11:53] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:12:13] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:12:13] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:12:33] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:12:33] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:12:53] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:12:53] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:13:13] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:13:13] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:13:33] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:13:33] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:13:53] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:13:53] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:14:13] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:14:13] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:14:33] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:14:33] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:14:53] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:14:53] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:15:13] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:15:13] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:15:33] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:15:33] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:15:53] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:15:53] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:16:13] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:16:13] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:16:33] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:16:33] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:16:53] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:16:53] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:17:13] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:17:13] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:17:33] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:17:33] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:17:53] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:17:53] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:18:13] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:18:13] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:18:34] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:18:34] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:18:54] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:18:54] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:19:14] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:19:14] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:19:34] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:19:34] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:19:54] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:19:54] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:20:14] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:20:14] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:20:34] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:20:34] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:20:54] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:20:54] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:21:14] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:21:14] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:21:34] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:21:34] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:21:54] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:21:54] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:22:14] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:22:14] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:22:34] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:22:34] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:22:54] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:22:54] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:23:14] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:23:14] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:23:34] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:23:34] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:23:54] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:23:54] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:24:14] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:24:14] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:24:34] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:24:34] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:24:54] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:24:54] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:25:14] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:25:14] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:25:34] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:25:34] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:25:54] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:25:54] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:26:14] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:26:14] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]

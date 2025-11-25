@@ -1,0 +1,33 @@
+[2025-11-25 13:41:33] INFO: Starting web app on 0.0.0.0:8080
+[2025-11-25 13:52:06] ERROR: Fetch error for EUR/USD: 
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/silvercoin-backend/backend.py", line 54, in fetch_from_twelvedata
+    async with session.get(TWELVEDATA_URL, params=params, timeout=15) as resp:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/client.py", line 1197, in __aenter__
+    self._resp = await self._coro
+                 ^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/client.py", line 608, in _request
+    await resp.start(conn)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/client_reqrep.py", line 971, in start
+    with self._timer:
+         ^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/helpers.py", line 735, in __exit__
+    raise asyncio.TimeoutError from None
+TimeoutError
+[2025-11-25 14:05:55] ERROR: Fetch error for EUR/USD: 
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/silvercoin-backend/backend.py", line 54, in fetch_from_twelvedata
+    async with session.get(TWELVEDATA_URL, params=params, timeout=15) as resp:
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/client.py", line 1197, in __aenter__
+    self._resp = await self._coro
+                 ^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/client.py", line 608, in _request
+    await resp.start(conn)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/client_reqrep.py", line 971, in start
+    with self._timer:
+         ^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/helpers.py", line 735, in __exit__
+    raise asyncio.TimeoutError from None
+TimeoutError
