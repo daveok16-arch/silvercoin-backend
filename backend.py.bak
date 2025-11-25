@@ -1,0 +1,245 @@
+#!/usr/bin/env python3
+"""
+Stable lightweight backend for Silvercoin (EUR/USD & AUD/USD)
+- Termux-friendly, small, robust (no pandas)
+- Uses TwelveData time_series endpoint
+- Polls safely and exposes /metrics and /sniper
+"""
+
+import os
+import asyncio
+import aiohttp
+from aiohttp import web
+import logging
+from logging.handlers import RotatingFileHandler
+import time
+import urllib.parse
+
+# -------- CONFIG --------
+PAIRS = ["EUR/USD", "AUD/USD"]
+TWELVEDATA_API_KEY = os.getenv("TWELVEDATA_API_KEY")  # must be set
+TWELVEDATA_URL = "https://api.twelvedata.com/time_series"
+KLINE_INTERVAL = "1min"
+KLINE_LIMIT = 150
+POLL_SECONDS = int(os.getenv("POLL_SECONDS", "60"))  # default 60s
+LOGFILE = os.path.expanduser("~/silvercoin-backend/backend.log")
+LOG_MAX_BYTES = 1_000_000  # rotate at ~1MB
+LOG_BACKUP_COUNT = 3
+
+# -------- LOGGING --------
+logger = logging.getLogger("silvercoin")
+logger.setLevel(logging.INFO)
+handler = RotatingFileHandler(LOGFILE, maxBytes=LOG_MAX_BYTES, backupCount=LOG_BACKUP_COUNT)
+fmt = logging.Formatter("[%(asctime)s] %(levelname)s: %(message)s")
+handler.setFormatter(fmt)
+logger.addHandler(handler)
+# also log to console
+console = logging.StreamHandler()
+console.setFormatter(fmt)
+logger.addHandler(console)
+
+# -------- RUNTIME STATE --------
+history = {p: [] for p in PAIRS}  # list newest last
+aio_session: aiohttp.ClientSession | None = None
+
+# -------- UTIL: safe request with retries --------
+async def twelvedata_request(params, max_retries=3, backoff=1.0):
+    global aio_session
+    if aio_session is None:
+        aio_session = aiohttp.ClientSession()
+    attempt = 0
+    while attempt <= max_retries:
+        try:
+            async with aio_session.get(TWELVEDATA_URL, params=params, timeout=15) as resp:
+                text = await resp.text()
+                # attempt to parse json safely
+                try:
+                    data = await resp.json()
+                except Exception:
+                    logger.warning("TwelveData returned non-JSON: %s", text[:200])
+                    return None
+                return data
+        except asyncio.CancelledError:
+            raise
+        except Exception as e:
+            attempt += 1
+            logger.warning("Request error (attempt %d/%d): %s", attempt, max_retries, e)
+            await asyncio.sleep(backoff * attempt)
+    logger.error("TwelveData request failed after %d attempts", max_retries)
+    return None
+
+# -------- FETCH & PARSE --------
+async def fetch_klines_for(pair):
+    # TwelveData expects symbol with slash encoded or passed as param; use percent-encoding
+    symbol = urllib.parse.quote(pair, safe="")
+    params = {
+        "symbol": pair,  # can use slash; aiohttp will encode when building query
+        "interval": KLINE_INTERVAL,
+        "outputsize": KLINE_LIMIT,
+        "apikey": TWELVEDATA_API_KEY,
+        "format": "JSON"
+    }
+    data = await twelvedata_request(params)
+    if not data:
+        return False
+    if isinstance(data, dict) and data.get("status") == "error":
+        logger.warning("TwelveData error for %s: %s", pair, data)
+        return False
+    values = data.get("values") if isinstance(data, dict) else None
+    if not values:
+        logger.info("No values returned for %s (maybe API limit).", pair)
+        return False
+    # values are newest first according to TwelveData docs; we want oldest->newest
+    values_rev = list(reversed(values))
+    # store just close prices (floats) and keep last KLINE_LIMIT
+    closes = []
+    for bar in values_rev:
+        try:
+            closes.append(float(bar["close"]))
+        except Exception:
+            continue
+    history[pair] = closes[-KLINE_LIMIT:]
+    logger.info("Fetched %d bars for %s", len(history[pair]), pair)
+    return True
+
+# -------- SIMPLE INDICATORS (small, robust) --------
+def sma(prices, n):
+    if len(prices) < n:
+        return None
+    return sum(prices[-n:]) / n
+
+def ema(prices, n):
+    if len(prices) < n:
+        return None
+    k = 2.0 / (n + 1.0)
+    vals = prices[-n:]
+    v = vals[0]
+    for x in vals[1:]:
+        v = x * k + v * (1 - k)
+    return v
+
+def rsi(prices, period=14):
+    if len(prices) < period + 1:
+        return None
+    gains = losses = 0.0
+    a = prices
+    for i in range(-period, 0):
+        diff = a[i] - a[i - 1]
+        if diff > 0:
+            gains += diff
+        else:
+            losses += -diff
+    avg_g = gains / period if gains else 1e-8
+    avg_l = losses / period if losses else 1e-8
+    rs = avg_g / avg_l
+    return 100.0 - (100.0 / (1 + rs))
+
+# Hybrid sniper-like signal (lightweight & safe)
+def compute_signal(pair):
+    prices = history.get(pair, [])
+    if not prices or len(prices) < 30:
+        return {"signal": None, "confidence": 0.0}
+    last = prices[-1]
+    ema20 = ema(prices, 20)
+    ema50 = ema(prices, 50)
+    sma10 = sma(prices, 10)
+    r = rsi(prices, 14)
+    vote_buy = vote_sell = 0.0
+    if ema20 and ema50:
+        if ema20 > ema50:
+            vote_buy += 1.0
+        else:
+            vote_sell += 1.0
+    if sma10:
+        if last > sma10:
+            vote_buy += 0.6
+        else:
+            vote_sell += 0.6
+    if r is not None:
+        if r < 30:
+            vote_buy += 0.8
+        elif r > 70:
+            vote_sell += 0.8
+    total = vote_buy + vote_sell + 1e-9
+    bnorm = vote_buy / total
+    snorm = vote_sell / total
+    conf = max(bnorm, snorm)
+    if bnorm - snorm > 0.25 and conf >= 0.6:
+        return {"signal": "BUY", "confidence": round(conf, 3)}
+    if snorm - bnorm > 0.25 and conf >= 0.6:
+        return {"signal": "SELL", "confidence": round(conf, 3)}
+    return {"signal": None, "confidence": round(conf, 3)}
+
+# -------- POLLER --------
+async def poller():
+    if not TWELVEDATA_API_KEY:
+        logger.error("TWELVEDATA_API_KEY not set. Exiting poller.")
+        return
+    logger.info("Poller started: pairs=%s interval=%ds", ", ".join(PAIRS), POLL_SECONDS)
+    while True:
+        for p in PAIRS:
+            try:
+                await fetch_klines_for(p)
+            except Exception as e:
+                logger.exception("Unexpected error while fetching %s: %s", p, e)
+            # small pause to avoid bursting the API
+            await asyncio.sleep(0.2)
+        await asyncio.sleep(POLL_SECONDS)
+
+# -------- HTTP HANDLERS --------
+async def handle_root(request):
+    return web.json_response({"status": "running", "pairs": PAIRS})
+
+async def handle_metrics(request):
+    out = {}
+    for p in PAIRS:
+        out[p] = {
+            "bars": len(history.get(p, [])),
+            "last": history.get(p, [])[-1] if history.get(p) else None
+        }
+    return web.json_response({"status": "ok", "pairs": out})
+
+async def handle_sniper(request):
+    res = {}
+    for p in PAIRS:
+        sig = compute_signal(p)
+        res[p] = {
+            "signal": sig["signal"],
+            "confidence": sig["confidence"],
+            "last_price": history.get(p, [])[-1] if history.get(p) else None,
+            "bars": len(history.get(p, []))
+        }
+    return web.json_response({"status": "ok", "results": res})
+
+# -------- START / CLEANUP --------
+async def on_startup(app):
+    global aio_session
+    aio_session = aiohttp.ClientSession()
+    app["poller"] = asyncio.create_task(poller())
+    logger.info("Backend started, poller task running.")
+
+async def on_cleanup(app):
+    global aio_session
+    if "poller" in app:
+        app["poller"].cancel()
+        try:
+            await app["poller"]
+        except asyncio.CancelledError:
+            pass
+    if aio_session:
+        await aio_session.close()
+    logger.info("Cleanup complete.")
+
+def main():
+    app = web.Application()
+    app.router.add_get("/", handle_root)
+    app.router.add_get("/metrics", handle_metrics)
+    app.router.add_get("/sniper", handle_sniper)
+    app.on_startup.append(on_startup)
+    app.on_cleanup.append(on_cleanup)
+
+    port = int(os.getenv("PORT", "8080"))
+    logger.info("Starting web app on 0.0.0.0:%d", port)
+    web.run_app(app, host="0.0.0.0", port=port)
+
+if __name__ == "__main__": main()

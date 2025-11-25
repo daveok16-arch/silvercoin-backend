@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 set -e
-exec gunicorn -k aiohttp.GunicornWebWorker backend:app --bind 0.0.0.0:$PORT
+# install dependencies (Render will do this automatically)
+pip install -r requirements.txt
+exec python3 backend.py
