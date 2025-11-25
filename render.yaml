@@ -3,8 +3,8 @@ services:
     name: silvercoin-backend
     env: python
     plan: free
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "python backend.py"
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn backend:app --bind 0.0.0.0:$PORT --worker-class aiohttp.GunicornWebWorker
     envVars:
-      - key: PORT
-        value: "10000"
+      - key: TWELVEDATA_API_KEY
+        value: "c13f966de04f4939b4325bb55cf7ffc0"
