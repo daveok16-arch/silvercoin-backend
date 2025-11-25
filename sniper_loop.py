@@ -1,90 +1,117 @@
 #!/usr/bin/env python3
-# sniper_loop.py - separate process, polls TwelveData and optionally sends Telegram alerts
+# sniper_loop.py — Trading signal sniper bot (Nigeria UTC+1 time)
+
 import asyncio
 import aiohttp
-import os
-import time
 import logging
 from logging.handlers import RotatingFileHandler
+from datetime import datetime
+from zoneinfo import ZoneInfo
+import os
+import time
+import requests
 
-# config
-TWELVEDATA_API_KEY = os.getenv("TWELVEDATA_API_KEY", "")
-PAIRS = ["EUR/USD", "AUD/USD"]
-INTERVAL = os.getenv("SNIPER_INTERVAL", "60")  # seconds between cycles
+# ==========================
+# CONFIG
+# ==========================
+NIGERIA_TZ = ZoneInfo("Africa/Lagos")
+
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "")
-TELEGRAM_CHAT = os.getenv("TELEGRAM_CHAT_ID", "")
-LOGFILE = os.path.expanduser("~/silvercoin-backend/sniper.log")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
+BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8080")
 
-# logging
+PAIRS = ["EUR/USD", "AUD/USD"]   # sniper pairs
+LOGFILE = os.path.expanduser("~/silvercoin-backend/sniper_loop.log")
+
+# ==========================
+# LOGGING (Nigeria time)
+# ==========================
+class NigeriaFormatter(logging.Formatter):
+    def formatTime(self, record, datefmt=None):
+        dt = datetime.fromtimestamp(record.created, tz=NIGERIA_TZ)
+        return dt.strftime("%Y-%m-%d %H:%M:%S")
+
 logger = logging.getLogger("sniper")
 logger.setLevel(logging.INFO)
-h = RotatingFileHandler(LOGFILE, maxBytes=500_000, backupCount=2)
-h.setFormatter(logging.Formatter("[%(asctime)s] %(levelname)s: %(message)s"))
-logger.addHandler(h)
+handler = RotatingFileHandler(LOGFILE, maxBytes=3_000_000, backupCount=3)
+handler.setFormatter(NigeriaFormatter("[%(asctime)s] %(levelname)s: %(message)s"))
+logger.addHandler(handler)
 logger.addHandler(logging.StreamHandler())
 
-async def fetch_pair(session, pair):
-    url = "https://api.twelvedata.com/time_series"
-    params = {"symbol": pair, "interval": "1min", "outputsize": 5, "apikey": TWELVEDATA_API_KEY}
-    try:
-        async with session.get(url, params=params, timeout=15) as resp:
-            return await resp.json()
-    except Exception as e:
-        logger.exception("Fetch error %s: %s", pair, e)
-        return None
-
-def simple_signal_from_latest(values):
-    if not values or not isinstance(values, list):
-        return None
-    latest = values[0]
-    try:
-        o = float(latest["open"]); c = float(latest["close"])
-    except Exception:
-        return None
-    if c > o: return ("BUY", latest)
-    if c < o: return ("SELL", latest)
-    return ("NEUTRAL", latest)
-
-async def send_telegram(text):
-    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT:
-        logger.info("Telegram not configured; not sending: %s", text)
+# ==========================
+# TELEGRAM
+# ==========================
+def send_telegram(msg: str):
+    if not TELEGRAM_TOKEN or not CHAT_ID:
+        logger.warning("Telegram not configured.")
         return
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    payload = {"chat_id": TELEGRAM_CHAT, "text": text}
-    async with aiohttp.ClientSession() as s:
-        try:
-            async with s.post(url, json=payload, timeout=10) as r:
-                ret = await r.json()
-                logger.info("Telegram response: %s", ret)
-        except Exception as e:
-            logger.exception("Telegram send failed: %s", e)
+    try:
+        requests.post(url, data={"chat_id": CHAT_ID, "text": msg})
+    except Exception as e:
+        logger.error("Telegram error: %s", e)
 
-async def run_cycle():
-    if not TWELVEDATA_API_KEY:
-        logger.error("TWELVEDATA_API_KEY not set; exiting sniper loop.")
-        return
-    async with aiohttp.ClientSession() as session:
-        while True:
-            for pair in PAIRS:
-                data = await fetch_pair(session, pair)
-                if not data:
-                    continue
-                vals = data.get("values")
-                res = simple_signal_from_latest(vals)
-                if not res:
-                    logger.info("%s: no signal (bad data)", pair)
-                    continue
-                sig, latest = res
-                msg = f"{pair} {latest.get('datetime')} OPEN {latest.get('open')} CLOSE {latest.get('close')} => {sig}"
-                logger.info(msg)
-                # only send Telegram for BUY/SELL (not NEUTRAL)
-                if sig in ("BUY", "SELL"):
-                    await send_telegram(msg)
-                await asyncio.sleep(0.2)
-            await asyncio.sleep(int(INTERVAL))
 
+# ==========================
+# FETCH SIGNAL
+# ==========================
+async def fetch_signal(pair):
+    url = f"{BACKEND_URL}/signal?pair={pair}"
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, timeout=10) as resp:
+                return await resp.json()
+    except Exception as e:
+        logger.error("Error fetching %s: %s", pair, e)
+        return None
+
+
+# ==========================
+# MAIN LOOP
+# ==========================
+async def sniper_loop():
+    logger.info("Starting SNIPER loop (Nigeria Time UTC+1)...")
+    send_telegram("🟢 *Sniper Bot Started*\nTimezone: Africa/Lagos (UTC+1)")
+
+    last_signal = {}
+
+    while True:
+        for pair in PAIRS:
+            sig = await fetch_signal(pair)
+            if not sig or "signal" not in sig:
+                continue
+
+            signal = sig["signal"]
+            time_local = sig["datetime"]
+            open_p = sig["open"]
+            close_p = sig["close"]
+
+            # Avoid duplicate spam
+            key = f"{pair}-{signal}-{time_local}"
+            if last_signal.get(pair) == key:
+                continue
+
+            last_signal[pair] = key
+
+            msg = (
+                f"📌 *{pair}*\n"
+                f"📊 Signal: *{signal}*\n"
+                f"🔵 Open: {open_p}\n"
+                f"🔴 Close: {close_p}\n"
+                f"⏰ Time (Nigeria): {time_local}"
+            )
+
+            send_telegram(msg)
+            logger.info("Sent signal: %s – %s", pair, signal)
+
+        await asyncio.sleep(20)   # frequency
+
+
+# ==========================
+# ENTRY POINT
+# ==========================
 if __name__ == "__main__":
     try:
-        asyncio.run(run_cycle())
+        asyncio.run(sniper_loop())
     except KeyboardInterrupt:
-        logger.info("Sniper loop stopped by user")
+        logger.info("Sniper stopped manually.")
