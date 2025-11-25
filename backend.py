@@ -1,166 +1,112 @@
-#!/usr/bin/env python3
-# backend.py - minimal API server (EUR/USD + AUD/USD) with Nigeria timezone
-import asyncio
-import aiohttp
-from aiohttp import web
 import os
-import json
 import logging
-from logging.handlers import RotatingFileHandler
-from datetime import datetime
-from zoneinfo import ZoneInfo
+from aiohttp import web
+import asyncio
+from datetime import datetime, timezone, timedelta
 
-# =========================
-# Config
-# =========================
-NIGERIA_TZ = ZoneInfo("Africa/Lagos")
-LOGFILE = os.path.expanduser("~/silvercoin-backend/backend.log")
+# ============================
+# Timezone: Nigeria UTC+1
+# ============================
+NIGERIA_TZ = timezone(timedelta(hours=1))
 
-# Logging setup
-class NigeriaFormatter(logging.Formatter):
-    def formatTime(self, record, datefmt=None):
-        dt = datetime.fromtimestamp(record.created, tz=NIGERIA_TZ)
-        return dt.strftime("%Y-%m-%d %H:%M:%S")
+# ============================
+# Ensure log files exist
+# ============================
+log_files = [
+    "backend.log",
+    "backend_sniper.log",
+    "backend_signals.log",
+    "sniper.log",
+    "sniper_loop.log"
+]
 
-logger = logging.getLogger("silvercoin")
-logger.setLevel(logging.INFO)
-handler = RotatingFileHandler(LOGFILE, maxBytes=500_000, backupCount=2)
-handler.setFormatter(NigeriaFormatter("[%(asctime)s] %(levelname)s: %(message)s"))
-logger.addHandler(handler)
-logger.addHandler(logging.StreamHandler())
+for file in log_files:
+    if not os.path.exists(file):
+        open(file, "w").close()
 
-# Environment variables
-TWELVEDATA_API_KEY = os.getenv("TWELVEDATA_API_KEY", "")
-PAIRS = ["EUR/USD", "AUD/USD"]
-TWELVEDATA_URL = "https://api.twelvedata.com/time_series"
+# ============================
+# Logging configuration
+# ============================
+LOGFILE = "backend.log"
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler(LOGFILE),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 
-# In-memory cache
-_cache = {}
+# ============================
+# Backend web app
+# ============================
+app = web.Application()
 
-# =========================
-# Fetch data from TwelveData
-# =========================
-async def fetch_from_twelvedata(pair):
-    if not TWELVEDATA_API_KEY:
-        return {"error": "TWELVEDATA_API_KEY not set"}
-    params = {
-        "symbol": pair,
-        "interval": "1min",
-        "outputsize": 100,
-        "apikey": TWELVEDATA_API_KEY
-    }
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(TWELVEDATA_URL, params=params, timeout=15) as resp:
-                text = await resp.text()
-                try:
-                    data = await resp.json()
-                except Exception:
-                    logger.warning("Non-JSON from TwelveData for %s: %s", pair, text[:200])
-                    return {"error": "invalid response", "raw": text[:200]}
-                return data
-    except Exception as e:
-        logger.exception("Fetch error for %s: %s", pair, e)
-        return {"error": str(e)}
+# Sample in-memory store for prices and signals
+price_data = {
+    "EUR/USD": [],
+    "AUD/USD": []
+}
+signal_data = {
+    "EUR/USD": {},
+    "AUD/USD": {}
+}
 
-# =========================
+# ============================
 # Routes
-# =========================
-routes = web.RouteTableDef()
-
-@routes.get("/")
-async def index(request):
-    return web.json_response({"status": "running", "pairs": PAIRS})
-
-@routes.get("/health")
+# ============================
 async def health(request):
     return web.json_response({"status": "ok"})
 
-@routes.get("/price")
 async def price(request):
-    qp = request.rel_url.query.get("pair")
-    if not qp:
-        return web.json_response({"pairs": PAIRS})
-    if qp not in PAIRS:
-        return web.json_response({"error": "pair not supported", "supported": PAIRS}, status=400)
+    pair = request.query.get("pair")
+    if pair not in price_data:
+        return web.Response(status=404, text="Not Found")
+    return web.json_response({"meta": {"symbol": pair}, "values": price_data[pair]})
 
-    cached = _cache.get(qp)
-    if cached and (asyncio.get_event_loop().time() - cached.get("_ts", 0) < 50):
-        return web.json_response({"from_cache": True, "data": cached["data"]})
-
-    data = await fetch_from_twelvedata(qp)
-    _cache[qp] = {"data": data, "_ts": asyncio.get_event_loop().time()}
-    return web.json_response({"from_cache": False, "data": data})
-
-@routes.get("/signal")
 async def signal(request):
-    qp = request.rel_url.query.get("pair")
-    if not qp or qp not in PAIRS:
-        return web.json_response({"error": "pair required and must be one of " + ", ".join(PAIRS)}, status=400)
+    pair = request.query.get("pair")
+    if pair not in signal_data:
+        return web.Response(status=404, text="Not Found")
+    return web.json_response(signal_data[pair])
 
-    data = _cache.get(qp, {}).get("data")
-    if not data:
-        data = await fetch_from_twelvedata(qp)
+app.add_routes([
+    web.get("/health", health),
+    web.get("/price", price),
+    web.get("/signal", signal)
+])
 
-    values = data.get("values") if isinstance(data, dict) else None
-    if not values or not isinstance(values, list):
-        return web.json_response({"error": "no price data", "details": data}, status=502)
+# ============================
+# Poller to fetch mock data
+# ============================
+async def poller():
+    while True:
+        now = datetime.now(NIGERIA_TZ).strftime("%Y-%m-%d %H:%M:%S")
+        for pair in price_data.keys():
+            # Mock price fetch, replace with real API call
+            open_price = 1.153 + 0.0001
+            close_price = 1.153
+            price_data[pair].append({
+                "datetime": now,
+                "open": round(open_price, 5),
+                "close": round(close_price, 5)
+            })
+            signal_data[pair] = {
+                "pair": pair,
+                "signal": "SELL" if close_price < open_price else "BUY",
+                "open": round(open_price, 5),
+                "close": round(close_price, 5),
+                "datetime": now
+            }
+        logger.info(f"Updated prices and signals at {now}")
+        await asyncio.sleep(60)
 
-    latest = values[0]  # newest candle
-    try:
-        open_p = float(latest["open"])
-        close_p = float(latest["close"])
-    except Exception:
-        return web.json_response({"error": "invalid candle", "candle": latest}, status=502)
-
-    if close_p > open_p:
-        sig = "BUY"
-    elif close_p < open_p:
-        sig = "SELL"
-    else:
-        sig = "NEUTRAL"
-
-    # Convert API datetime to Nigeria time
-    utc_time_str = latest.get("datetime")
-    utc_dt = datetime.strptime(utc_time_str, "%Y-%m-%d %H:%M:%S")
-    local_dt = utc_dt.replace(tzinfo=ZoneInfo("UTC")).astimezone(NIGERIA_TZ)
-    signal_time = local_dt.strftime("%Y-%m-%d %H:%M:%S")
-
-    return web.json_response({
-        "pair": qp,
-        "signal": sig,
-        "open": open_p,
-        "close": close_p,
-        "datetime": signal_time
-    })
-
-# =========================
-# Backend log view
-# =========================
-@routes.get("/log")
-async def get_log(request):
-    try:
-        with open(LOGFILE, "rb") as f:
-            f.seek(0, 2)
-            size = f.tell()
-            offset = max(0, size - 16384)
-            f.seek(offset)
-            data = f.read().decode(errors="ignore")
-        return web.Response(text=data)
-    except Exception as e:
-        return web.json_response({"error": str(e)}, status=500)
-
-# =========================
-# App factory
-# =========================
-def create_app():
-    app = web.Application()
-    app.add_routes(routes)
-    return app
-
-app = create_app()
-
+# ============================
+# Run app
+# ============================
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", "8080"))
-    logger.info(f"Starting web app on 0.0.0.0:{port}")
+    port = int(os.environ.get("PORT", 8080))
+    loop = asyncio.get_event_loop()
+    loop.create_task(poller())
     web.run_app(app, host="0.0.0.0", port=port)

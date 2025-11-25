@@ -241,3 +241,24 @@
 [2025-11-25 18:25:54] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
 [2025-11-25 18:26:14] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
 [2025-11-25 18:26:14] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:29:51] INFO: Starting SNIPER loop (Nigeria Time UTC+1)...
+[2025-11-25 18:29:51] WARNING: Telegram not configured.
+[2025-11-25 18:32:42] INFO: Sniper stopped manually.
+[2025-11-25 18:34:34] INFO: Starting SNIPER loop (Nigeria Time UTC+1)...
+[2025-11-25 18:35:00] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:35:00] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:35:20] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:35:20] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:35:40] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:35:40] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:36:00] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:36:00] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:36:20] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:36:20] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:36:40] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:36:40] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:37:00] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:37:00] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:37:20] ERROR: Error fetching EUR/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:37:20] ERROR: Error fetching AUD/USD: Cannot connect to host 127.0.0.1:8080 ssl:default [Connect call failed ('127.0.0.1', 8080)]
+[2025-11-25 18:37:21] INFO: Sniper stopped manually.
